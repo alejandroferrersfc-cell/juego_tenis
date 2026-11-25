@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎾 Carrera de Tenis - Simulador Interactivo</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="game-container">
+
+  <!-- PANTALLA DE INICIO -->
+  <div id="start-screen" class="screen active">
+    <h1>🎾 Carrera de Tenis</h1>
+    <p>Construye tu carrera desde los primeros torneos hasta la élite: entrena, gestiona tu OVR, juega los puntos y decide qué patrocinadores aceptar.</p>
+    <input type="text" id="player-name" placeholder="Ingresa tu nombre o apodo..." maxlength="20">
+    <label class="country-label" for="player-country">País (te convocará a los Juegos Olímpicos)</label>
+    <select id="player-country"></select>
+    <label class="country-label" for="player-style">Estilo de juego (afecta a qué raqueta te favorece)</label>
+    <select id="player-style">
+      <option value="Polivalente">Polivalente</option>
+      <option value="Agresivo">Agresivo</option>
+      <option value="Control">Control</option>
+      <option value="Defensivo">Defensivo</option>
+    </select>
+    <button class="btn" id="start-btn" type="button">Comenzar Carrera</button>
+    <button class="btn secondary" id="continue-btn" type="button" hidden>Continuar carrera guardada</button>
+  </div>
+
+  <!-- PANTALLA DE JUEGO -->
+  <div id="game-screen" class="screen">
+    <h2 id="player-display">Jugador: <span id="name-val">-</span></h2>
+    <div class="rank-badge" id="rank-val">Jugador Amateur</div>
+    <p class="career-progress" id="career-progress" aria-live="polite"></p>
+    <div class="career-actions">
+      <p class="injury-status" id="injury-status" aria-live="polite" hidden></p>
+      <button class="btn retire-btn" id="retire-btn" type="button">🏁 Retirarme</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card ovr-card">
+        <div class="stat-label">⭐ OVR</div>
+        <div class="stat-value" id="ovr-val">50</div>
+        <div class="progress"><div class="progress-bar" id="ovr-bar" style="width: 50%"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🎾 Técnica</div>
+        <div class="stat-value" id="skill-val">50</div>
+        <div class="progress"><div class="progress-bar" id="skill-bar" style="width: 50%"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">⚡ Energía</div>
+        <div class="stat-value" id="energy-val">70</div>
+        <div class="progress"><div class="progress-bar" id="energy-bar" style="width: 70%"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🌟 Fama</div>
+        <div class="stat-value" id="fame-val">10</div>
+        <div class="progress"><div class="progress-bar" id="fame-bar" style="width: 10%"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">💰 Dinero</div>
+        <div class="stat-value">$<span id="money-val">100</span></div>
+      </div>
+    </div>
+
+    <div class="career-tabs" id="career-tabs" role="tablist" aria-label="Secciones de la carrera">
+      <button class="career-tab" id="career-tab" data-tab="career" type="button" role="tab" aria-selected="true" aria-controls="career-panel">🎾 Carrera</button>
+      <button class="career-tab" id="ranking-tab" data-tab="ranking" type="button" role="tab" aria-selected="false" aria-controls="ranking-panel">📈 Ranking</button>
+      <button class="career-tab" id="calendar-tab" data-tab="calendar" type="button" role="tab" aria-selected="false" aria-controls="calendar-panel">🗓️ Calendario</button>
+      <button class="career-tab" id="shop-tab" data-tab="shop" type="button" role="tab" aria-selected="false" aria-controls="shop-panel">🛒 Tienda</button>
+    </div>
+
+    <section class="career-tab-panel" id="career-panel" role="tabpanel" aria-labelledby="career-tab">
+      <div id="scenario-box">
+        <h3 id="scenario-title">Situación</h3>
+        <p id="scenario-text">...</p>
+      </div>
+
+      <div class="choices" id="choices-container"></div>
+
+      <section class="match-screen" id="match-screen" aria-label="Partido de tenis" hidden>
+        <div class="match-header">
+          <h2 id="match-title">Partido en juego</h2>
+          <span class="rank-badge" id="match-ovr">OVR 50</span>
+        </div>
+        <div class="match-scoreboard" aria-live="polite">
+          <div class="match-player"><strong id="match-player-name">Tú</strong><span class="serve-dot" id="match-player-serve"></span><span>OVR <span id="match-player-ovr">50</span></span><span class="match-score-label" id="match-player-score">0</span></div>
+          <div class="match-games"><span id="match-player-games">0</span> : <span id="match-rival-games">0</span><div class="match-detail">Juegos</div><div class="match-detail" id="match-sets">Sets 0 - 0</div></div>
+          <div class="match-player"><strong id="match-rival-name">Rival</strong><span class="serve-dot" id="match-rival-serve"></span><span>OVR <span id="match-rival-ovr">50</span></span><span class="match-detail" id="match-rival-style"></span><span class="match-score-label" id="match-rival-score">0</span></div>
+        </div>
+        <p class="match-context"><strong id="match-serve-label">Saque</strong> · <span id="match-set-label"></span></p>
+        <p class="match-break" id="match-break-alert" aria-live="assertive"></p>
+        <div class="shot-panel">
+          <p class="shot-situation" id="match-situation"></p>
+          <div class="pattern-head"><strong id="pattern-label"></strong><span>Lectura del rival</span></div>
+          <div class="pattern-track" role="progressbar" aria-label="Lectura del patrón por el rival"><div class="pattern-bar" id="pattern-bar"></div></div>
+        </div>
+        <div class="court" id="court" role="img" aria-label="Pista de tenis con el jugador y su rival">
+          <span class="court-center-line"></span><span class="court-net"></span>
+          <span class="court-player you" id="court-player-name">Tú</span>
+          <span class="court-player rival" id="court-rival-name">Rival</span>
+          <span class="court-ball"></span>
+        </div>
+        <p class="match-message" id="match-message" aria-live="polite">Elige cómo jugar el siguiente punto.</p>
+        <div class="match-controls">
+          <strong id="match-turn-label">Punto 1</strong>
+          <p class="match-tip">Varía tu juego: si eliges siempre la misma opción, tu rival aprenderá a leerte.</p>
+          <div class="match-choices" id="match-choices"></div>
+        </div>
+      </section>
+
+      <h3 style="margin-top:10px;">📜 Registro de Carrera</h3>
+      <div id="log"></div>
+    </section>
+
+    <section class="career-tab-panel" id="ranking-panel" role="tabpanel" aria-labelledby="ranking-tab" hidden>
+      <h2>📈 Ranking de carrera</h2>
+      <p>Posición y puntos simulados del circuito. Los puntos de cada torneo caducan al cumplirse un año y deben defenderse en la siguiente edición.</p>
+      <div class="ranking-summary">
+        <span class="stat-label">Categoría actual</span>
+        <strong class="ranking-current" id="ranking-current">Jugador Amateur</strong>
+        <span class="ranking-current" id="ranking-position">Puesto simulado: 2000</span>
+        <span id="ranking-points">0 puntos acumulados</span>
+        <span class="match-detail" id="ranking-next">Siguiente categoría: Categoría Nacional</span>
+        <div class="ranking-progress" role="progressbar" aria-label="Progreso hacia la siguiente categoría" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="ranking-progress-bar" id="ranking-progress-bar" style="width: 0%"></div>
+        </div>
+      </div>
+      <div class="ranking-history-wrap">
+        <h3>Historial por temporada</h3>
+        <table class="ranking-table">
+          <thead><tr><th>Temporada</th><th>Edad</th><th>Categoría</th><th>Puntos netos</th><th>Puesto final</th><th>Balance</th></tr></thead>
+          <tbody id="ranking-history"></tbody>
+        </table>
+      </div>
+      <div class="trophy-wrap">
+        <h3>🏆 Vitrina de trofeos</h3>
+        <p class="trophy-summary" id="trophy-summary"></p>
+        <div class="trophy-cabinet" id="trophy-cabinet"></div>
+        <h4>🥇 Medallas olímpicas</h4>
+        <p class="trophy-summary" id="medal-cabinet"></p>
+        <h4>🎾 Títulos por superficie y finales</h4>
+        <p class="trophy-summary" id="trophy-surfaces"></p>
+        <h4>📊 Cara a cara</h4>
+        <p class="trophy-summary" id="head-to-head"></p>
+      </div>
+    </section>
+
+    <section class="career-tab-panel" id="calendar-panel" role="tabpanel" aria-labelledby="calendar-tab" hidden>
+      <h2>🗓️ Calendario de torneos</h2>
+      <p id="calendar-intro"></p>
+      <div class="calendar-layout">
+        <div class="calendar-events" id="calendar-events"></div>
+        <section class="tournament-detail" id="tournament-detail" aria-live="polite">
+          <h3>Elige un torneo</h3>
+          <p>Consulta su categoría, superficie, puntos y requisito de entrada.</p>
+        </section>
+      </div>
+      <section class="tournament-bracket" id="tournament-bracket" hidden>
+        <h3 id="bracket-title">Cuadro del torneo</h3>
+        <p id="bracket-status" aria-live="polite"></p>
+        <div class="bracket-rounds" id="bracket-rounds"></div>
+      </section>
+    </section>
+
+    <section class="career-tab-panel" id="shop-panel" role="tabpanel" aria-labelledby="shop-tab" hidden>
+      <h2>🛒 Tienda de tenis</h2>
+      <p>Invierte tu dinero en entrenadores y material de marcas reales. Un entrenador acelera la subida de técnica; las zapatillas y raquetas aumentan tus opciones según la superficie (máximo +5% por partido). El mejor objeto de cada categoría se usa automáticamente.</p>
+      <p class="shop-summary" id="shop-summary"></p>
+      <div class="shop-items" id="shop-items"></div>
+    </section>
+
+    <section class="season-summary-card" id="season-summary" hidden aria-live="polite">
+      <h2 class="season-summary-title" id="season-summary-title">¡Se acabó la temporada!</h2>
+      <p id="season-summary-message"></p>
+      <div class="season-summary-stats">
+        <div class="season-summary-stat"><strong id="summary-record">0V - 0D</strong><span>Partidos de la temporada</span></div>
+        <div class="season-summary-stat"><strong id="summary-ranking-change">—</strong><span>Movimiento en el ranking</span></div>
+        <div class="season-summary-stat"><strong id="summary-points-change">0</strong><span>Balance de puntos</span></div>
+        <div class="season-summary-stat"><strong id="summary-tournaments">0 / 12</strong><span>Torneos disputados</span></div>
+      </div>
+      <p id="summary-tournament-winners"></p>
+      <button class="btn" id="season-continue-btn" type="button">Continuar a la siguiente temporada</button>
+    </section>
+  </div>
+
+  <!-- PANTALLA FINAL -->
+  <div id="end-screen" class="screen end-screen">
+    <div class="end-title" id="end-title">🏆 Carrera Finalizada</div>
+    <p id="end-message"></p>
+    <div class="end-stats" id="end-stats"></div>
+    <button class="btn" id="restart-btn" type="button">Jugar de Nuevo</button>
+  </div>
+</div>
+
+<!-- Ventana emergente de resultados, celebraciones y compras -->
+<div class="modal-overlay" id="modal-overlay" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-icon" id="modal-icon">🎾</div>
+    <h2 class="modal-title" id="modal-title"></h2>
+    <p class="modal-message" id="modal-message"></p>
+    <div class="modal-stats" id="modal-stats"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+<div class="confetti-layer" id="confetti-layer" hidden aria-hidden="true"></div>
+
+<!-- Orden de carga: cada archivo depende de los anteriores -->
+<script src="js/utils.js"></script>
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/ranking.js"></script>
+<script src="js/match.js"></script>
+<script src="js/tournament.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
